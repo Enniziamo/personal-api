@@ -49,23 +49,19 @@ app.MapGet("/api/repos", async (GitHubService github) =>
     }
 });
 
-app.MapGet("/api/repos/top", async (GitHubService github, int count = 5) =>
-{
-    try
+app.MapGet("/api/repos/top", async (GithubService github, async (
+    GithubService github,
+    [Range(1, 100)] int count = 5) =>
     {
         var repos = await github.GetMyReposAsync();
 
         var top = repos
             .OrderByDescending(r => r.StargazersCount)
             .ThenByDescending(r => r.UpdatedAt)
-            .Take(Math.Clamp(count, 1, 20));
+            .Take(count);
 
         return Results.Ok(top);
     }
-    catch (HttpRequestException ex)
-    {
-        return Results.Problem(ex.Message);
-    }
-});
+    ))
 
 app.Run();
